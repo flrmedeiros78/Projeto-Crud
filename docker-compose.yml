@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+    postgres:
+        image: postgres:latest
+        ports:
+            - "5432:5432"
+        volumes:
+            - postgres_data:/var/lib/postgresql
+        environment:
+            POSTGRES_DB: mydatabase
+            POSTGRES_USER: user
+            POSTGRES_PASSWORD: password
+  
+        networks:
+            - mynetwork  
+ 
+networks:
+    mynetwork:
+
+volumes: #docker você vai poder olhar esse path e criar arquivo aqui. (docker compose down)
+    postgres_data:
