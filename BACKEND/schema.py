@@ -1,13 +1,17 @@
-from pydantic import BaseModel, PositiveFloat, EmailStr, validators
-from enum import Enum as en
-from datetime import datetime as dt
-from typing import Optional as opt
+from pydantic import BaseModel, EmailStr, condecimal, Field
+from enum import Enum
+from decimal import Decimal
+from datetime import datetime
+from typing import Annotated, Optional
+
+# Decimal maior que zero, reutilizável nos schemas
+Valor = Annotated[Decimal, Field(gt=0)]
 
 # producBase será o dem=nominador de todos os ostros(insert, delete e update)
 class productBase(BaseModel): 
   name: str
   descricao: str
-  valor: PositiveFloat
+  valor: Valor
   categoria: str
   email_fornecedor: EmailStr
     
@@ -18,20 +22,17 @@ class ProductCreate(productBase):
 
 class ProductResponse(productBase):
   id: int
-  dt_procs: dt # dt -> datetime
+  dt_procs: datetime
   class Config:
     from_atributes = True
 
 class ProductDelete():
     id: int 
 
-class ProductUpdate():
-  name: opt [str] = None
-  descricao: opt [str] = None
-  valor: opt [PositiveFloat] = None
-  categoria: opt [str] = None
-  email_fornecedor: opt [EmailStr] = None
+class ProductUpdate(BaseModel):
+  name: Optional [str] = None
+  descricao: Optional [str] = None
+  valor: Optional [Valor] = None     # Decimal > 0] = None
+  categoria: Optional [str] = None
+  email_fornecedor: Optional [EmailStr] = None
   
-  
-
-

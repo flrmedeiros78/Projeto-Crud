@@ -2,9 +2,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 # comunicação com banco de dados postgres
-POSTGRES_DATABASE_URL = "postgressql://user:password@postgres/mydatabase"
 
-engine = create_engine(POSTGRES_DATABASE_URL)
+#DATABASE_URL = "postgresql://user:password@postgres/mydatabase"
+DATABASE_URL = "postgresql+psycopg2://user:password@postgres:5432/mydatabase"
+engine = create_engine(DATABASE_URL)
 
 # comit automatico falso
 # atualização automatica falsp

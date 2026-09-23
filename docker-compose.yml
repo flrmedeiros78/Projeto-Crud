@@ -16,11 +16,12 @@ services:
   backend:
     build:
       context: ./BACKEND
-      dockerfile: dockerfile
+      dockerfile: dockerfile-backend
     volumes:
       - ./BACKEND:/app
     environment:
-      DATABASE_URL: postgresql://user:password@postgres:5432/mydatabase
+      DATABASE_URL: postgresql+psycopg2://user:password@postgres:5432/mydatabase
+      #DATABASE_URL: postgresql://user:password@postgres:5432/mydatabase
     ports:
       - "8000:8000"
     depends_on:

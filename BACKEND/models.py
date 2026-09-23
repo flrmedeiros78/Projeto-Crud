@@ -2,7 +2,7 @@
 
 from sqlalchemy import Column, Integer, String, Float, DateTime
 from sqlalchemy.sql import func
-from  database import Base
+from database import Base
 
 # class productModel é uma representação da tabela
 class produtcModel(Base):
@@ -11,8 +11,7 @@ class produtcModel(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     descricao = Column(String)
-    valor = Column(float)
+    valor = Column(Float)
     categoria = Column(String)
     email_fornecedor = Column(String)
-    dt_procs = Column(DateTime(timezone=True), dafault=func.now())
-    
+    dt_procs = Column(DateTime(timezone=True), default=func.now())   
