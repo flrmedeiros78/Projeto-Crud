@@ -185,23 +185,45 @@ Para parar e remover os containers: `docker compose down` (adicione `-v` para ap
 
 O projeto rendeu bons aprendizados de depuração:
 
-|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Problema                                       | Causa                                                                           | Solução                                                     |
-|------------------------------------------------|---------------------------------------------------------------------------------|-------------------------------------------------------------|
-| `TypeError` ao usar `bool \| None`             | Imagem Docker com Python 3.9, enquanto o código usa sintaxe do 3.10+            | Atualizar a imagem base para `python:3.12-slim`             |
-|------------------------------------------------|---------------------------------------------------------------------------------|-------------------------------------------------------------|
-| Build falhando com `pg_config not found`       | `psycopg2` tentando compilar em imagem `slim`                                   | Trocar por `psycopg2-binary`                                |
-|------------------------------------------------|---------------------------------------------------------------------------------|-------------------------------------------------------------|
-| Erros de tipo no Pydantic com `condecimal`     | Uso sem parênteses e sem parâmetros                                             | `Annotated[Decimal, Field(gt=0)]`                           |
-|------------------------------------------------|---------------------------------------------------------------------------------|-------------------------------------------------------------|
-| `create_all() got an unexpected keyword 'bin'` | Erro de digitação no parâmetro                                                  | `bind=engine`                                               |
-|------------------------------------------------|---------------------------------------------------------------------------------|-------------------------------------------------------------|
-| Compose construindo a imagem antiga            | Arquivo de Dockerfile com nome diferente do configurado                         | Alinhar `dockerfile:` no `docker-compose.yml`               |
-|------------------------------------------------|---------------------------------------------------------------------------------|-------------------------------------------------------------|
-| Arquivos `__pycache__` no commit               | Falta de `.gitignore` na raiz do projeto                                        | Criar `.gitignore` e remover do stage                       |
-|------------------------------------------------|---------------------------------------------------------------------------------|-------------------------------------------------------------|
-| Erro 500 ao devolver objetos do banco          | `from_atributes` com erro de digitação, então o Pydantic não lia objetos do ORM | `ConfigDict(from_attributes=True)`                          |
-|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+1. **Problema:** `TypeError` ao usar `bool | None`
+ - **Causa:** Imagem Docker com Python 3.9, enquanto o código usa sintaxe do 3.10+
+ - **Resolução:** Atualizar a imagem base para `python:3.12-slim`
+
+2. **Problema:** Build falhando com `pg_config not found`
+ - **Causa:** `psycopg2` tentando compilar em imagem `slim`
+ - **Resolução:** Trocar por `psycopg2-binary`
+
+3. **Problema:** Erros de tipo no Pydantic com `condecimal`
+ - **Causa:** Uso sem parênteses e sem parâmetros
+ - **Resolução:** `Annotated[Decimal, Field(gt=0)]`
+
+4. **Problema:** `create_all() got an unexpected keyword 'bin'`
+ - **Causa:** Erro de digitação no parâmetro
+ - **Resolução:** `bind=engine`
+
+5. **Problema:** Compose construindo a imagem antiga
+ - **Causa:** Arquivo de Dockerfile com nome diferente do configurado
+ - **Resolução:** Alinhar `dockerfile:` no `docker-compose.yml`
+
+6. **Problema:** Arquivos `__pycache__` no commit
+ - **Causa:** Falta de `.gitignore` na raiz do projeto
+ - **Resolução:** Criar `.gitignore` e remover do stage
+
+7. **Problema:** Erro 500 ao devolver objetos do banco
+ - **Causa:** `from_atributes` com erro de digitação, então o Pydantic não lia objetos do ORM
+ - **Resolução:** `ConfigDict(from_attributes=True)`
+
+8. **Problema:** `TypeError` ao listar ou buscar produtos
+ - **Causa:** Duas funções `get_products` no mesmo arquivo; a segunda sobrescrevia a primeira
+ - **Resolução:** Separar em `get_products` (lista) e `get_product` (um item)
+
+9. **Problema:** `PUT` não atualizava corretamente
+ - **Causa:** Condições testavam o objeto do banco e as atribuições sobrescreviam a variável
+ - **Resolução:** Testar `product.campo` e gravar em `db_product.campo`
+
+10. **Problema:** `create_engine` recebendo `None`
+  - **Causa:** `os.getenv` chamado sem o nome da variável
+  - **Resolução:** `os.getenv("DATABASE_URL", "valor_padrao")`
 
 ## Próximos passos em andamento:
 
