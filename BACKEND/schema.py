@@ -1,11 +1,11 @@
-from pydantic import BaseModel, EmailStr, condecimal, Field
+from pydantic import BaseModel, EmailStr, Field
 from enum import Enum
 from decimal import Decimal
 from datetime import datetime
-from typing import Annotated, Optional
+from typing import Annotated, Optional 
 
 # Decimal maior que zero, reutilizável nos schemas
-Valor = Annotated[Decimal, Field(gt=0)]
+Valor = Annotated[Decimal, Field(gt=0, examples=[150.00])]
 
 # producBase será o dem=nominador de todos os ostros(insert, delete e update)
 class productBase(BaseModel): 
