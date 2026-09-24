@@ -31,7 +31,7 @@ API REST para cadastro e gerenciamento de produtos, construída durante o treina
 | Containers          | Docker e Docker Compose                                      |
 | Dependências        | Poetry (`pyproject.toml`) e `requirements.txt` para a imagem |
 | Versionamento       | Git e GitHub                                                 |
-|------------------------------------------------------------------------------------|
+
 ## Arquitetura
 
 O backend é dividido em camadas, cada uma com uma responsabilidade:
