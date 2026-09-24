@@ -28,7 +28,7 @@ def read_all_products_router(db: Session = Depends(get_db)):
 @router.get("/products/{product_id}", response_model=ProductResponse)
 def read_one_product_router(product_id: int, db: Session = Depends(get_db)):
   """ SELECIONA Somente um Registro """
-  db_product = get_products(db=db, product_id=product_id)
+  db_product = get_product(db=db, product_id=product_id)
   
   if db_product is None:
     raise HTTPException(status_code=404, detail="Produto não existe na base de dados!")  

@@ -209,9 +209,9 @@ O projeto rendeu bons aprendizados de depuração:
  - **Causa:** Falta de `.gitignore` na raiz do projeto
  - **Resolução:** Criar `.gitignore` e remover do stage
 
-7. **Problema:** Erro 500 ao devolver objetos do banco
- - **Causa:** `from_atributes` com erro de digitação, então o Pydantic não lia objetos do ORM
- - **Resolução:** `ConfigDict(from_attributes=True)`
+7. **Problema:** `GET /products/{id}` retornando erro 500
+ - **Causa:** A rota chamava `get_products` (lista) passando `product_id`
+ - **Resolução:** Usar `get_product`, que busca um item pelo id
 
 8. **Problema:** `TypeError` ao listar ou buscar produtos
  - **Causa:** Duas funções `get_products` no mesmo arquivo; a segunda sobrescrevia a primeira

@@ -1,5 +1,41 @@
 __pycache__/
 *.pyc
 .env
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# ---------- Ambientes virtuais ----------
 .venv/
 venv/
+env/
+
+# ---------- Variáveis de ambiente e segredos ----------
+.env
+.env.*
+!.env.example
+
+# ---------- Testes, cache e ferramentas ----------
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ---------- Bancos locais e logs ----------
+*.db
+*.sqlite3
+*.log
+
+# ---------- Editores ----------
+.vscode/
+.idea/
+*.swp
+
+# ---------- Sistema operacional ----------
+.DS_Store
+Thumbs.db
