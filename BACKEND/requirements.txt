@@ -3,3 +3,5 @@ uvicorn
 SQLAlchemy
 email-validator
 psycopg2-binary
+pydantic-settings==2.15.0
+python-dotenv==1.2.3

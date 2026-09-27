@@ -2,30 +2,42 @@
 services:
   postgres:
     image: postgres:16 # latest
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      #start_period: 30s
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: mydatabase
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "5432:5432"
+      - "${DB_PORT}:5432"
     networks:
       - mynetwork
 
   backend:
     build:
       context: ./BACKEND
-      dockerfile: dockerfile-backend
+      dockerfile: dockerfile
     volumes:
       - ./BACKEND:/app
     environment:
-      DATABASE_URL: postgresql+psycopg2://user:password@postgres:5432/mydatabase
-      #DATABASE_URL: postgresql://user:password@postgres:5432/mydatabase
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DATABASE_URL: ${DATABASE_URL}
     ports:
       - "8000:8000"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      #- postgres
     networks:
       - mynetwork
 

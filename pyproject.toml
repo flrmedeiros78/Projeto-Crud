@@ -12,6 +12,8 @@ dependencies = [
     "fastapi (>=0.141.1,<0.142.0)",
     "uvicorn (>=0.53.0,<0.54.0)",
     "psycopg2-binary (>=2.9.13,<3.0.0)",
+    "streamlit (>=1.64.0,<2.0.0)",
+    "pydantic-settings (>=2.15.0,<3.0.0)",
 ]
 
 [tool.poetry]
