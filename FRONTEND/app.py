@@ -284,7 +284,7 @@ with st.expander("Atualiza Produto", expanded=False):
           name = st.text_input("Nome *", value=prod["name"],)
           descricao = st.text_area("Descrição *", value=prod["descricao"],)
           # Verifica se o valor está corrompido antes de exibir
-          _valor_bruto = float(prod["valor"])git stat
+          _valor_bruto = float(prod["valor"])
           if _valor_bruto > 1_000_000_000:
             valor = st.text_input(
             "valor (R$)*",

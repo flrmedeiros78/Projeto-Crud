@@ -1,12 +1,13 @@
 # CRUD de Produtos com FastAPI, PostgreSQL e Docker
 
-API REST para cadastro e gerenciamento de produtos, construída durante o treinamento **Jornada de Dados**. O projeto implementa as quatro operações básicas de um CRUD (Create, Read, Update e Delete) sobre uma tabela no PostgreSQL, com validação de dados, documentação automática e ambiente totalmente containerizado.
+API REST para cadastro e gerenciamento de produtos, construída durante o treinamento **Jornada de Dados**. O projeto implementa as quatro operações básicas de um CRUD (Create, Read, Update e Delete) sobre uma tabela no PostgreSQL, com validação de dados, documentação automática, configuração via variáveis de ambiente e ambiente totalmente containerizado.
 
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 ![Poetry](https://img.shields.io/badge/Poetry-gerenciador-60A5FA?logo=poetry&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-frontend-FF4B4B?logo=streamlit&logoColor=white)
 
 ## O que o projeto faz
 
@@ -14,8 +15,10 @@ API REST para cadastro e gerenciamento de produtos, construída durante o treina
 - Valida os dados de entrada e saída com **Pydantic** (e-mail do fornecedor válido, valor maior que zero, campos obrigatórios).
 - Persiste os dados em **PostgreSQL** usando o **SQLAlchemy ORM**.
 - Cria a tabela automaticamente na inicialização da aplicação.
+- Lê a configuração de conexão (host, porta, banco, usuário, senha) a partir de variáveis de ambiente, com validação via `pydantic-settings`.
 - Gera documentação interativa (Swagger UI) sem configuração extra.
 - Sobe backend e banco com um único comando via **Docker Compose**.
+- Possui um front-end em **Streamlit** para consumir a API.
 
 ## Stack
 
@@ -24,82 +27,66 @@ API REST para cadastro e gerenciamento de produtos, construída durante o treina
 | Linguagem           | Python 3.12                                                  |
 | Framework web       | FastAPI                                                      |
 | Servidor ASGI       | Uvicorn                                                      |
-| Validação e schemas | Pydantic v2 (`EmailStr`, `Field`, `Annotated`)               |
+| Front-end           | Streamlit                                                    |
+| Validação e schemas | Pydantic v2 (`EmailStr`, `Field`, `Annotated`)                |
+| Configuração        | `pydantic-settings` + `python-dotenv` (variáveis via `.env`) |
 | ORM                 | SQLAlchemy 2.x                                               |
 | Banco de dados      | PostgreSQL 16                                                |
 | Driver              | psycopg2-binary                                              |
 | Containers          | Docker e Docker Compose                                      |
-| Dependências        | Poetry (`pyproject.toml`) e `requirements.txt` para a imagem |
+| Dependências        | Poetry (`pyproject.toml`, `poetry.toml`, `poetry.lock`)      |
 | Versionamento       | Git e GitHub                                                 |
 
 ## Arquitetura
 
 O backend é dividido em camadas, cada uma com uma responsabilidade:
 
-```
-               +------------------------+
-               |  Cliente / Swagger UI  |
-               +------------------------+
-                            |
-                            v
-               +------------------------+
-               |       router.py        |
-               |       rotas HTTP       |
-               +------------------------+
-                            |
-             +--------------+--------------+
-             |                             |
-             v                             v
-+------------------------+    +------------------------+
-|       schema.py        |    |        crud.py         |
-|   validação Pydantic   |    |   operações no banco   |
-+------------------------+    +------------------------+
-                                           |
-                                           v
-                              +------------------------+
-                              |       models.py        |
-                              |       tabela ORM       |
-                              +------------------------+
-                                           |
-                                           v
-                              +------------------------+
-                              |      database.py       |
-                              |    engine e sessão     |
-                              +------------------------+
-                                           |
-                                           v
-                              +------------------------+
-                              |       PostgreSQL       |
-                              +------------------------+
-```
+![Diagrama de arquitetura](assets/diagrama-arquitetura.svg)
+
+![alt text](img/diagrama-arquitetura-crud-produtos.svg)
 
 | Arquivo | Responsabilidade |
 |---------------|-------------------------------------------------------------------------------------------|
 | `main.py`     | Cria a aplicação FastAPI, registra o router e cria as tabelas                             |
 | `router.py`   | Define os endpoints, injeta a sessão do banco (`Depends`) e trata erros 404               |
-| `schema.py`   | Modelos Pydantic de entrada (`ProductCreate`, `ProductUpdate`) e saída (`ProductResponse`)|
+| `schema.py`   | Modelos Pydantic de entrada (`ProductCreate`, `ProductUpdate`) e saída (`ProductResponse`) |
 | `crud.py`     | Funções de acesso a dados: consultar, inserir, atualizar e excluir                        |
-| `models.py`   | Modelo ORM da tabela `tb_produtos`                                                        |
-| `database.py` | Engine, `SessionLocal` e a dependência `get_db` (gerador com `yield`)                     |
+| `models.py`   | Modelo ORM da tabela `tb_produtos`                                                         |
+| `database.py` | Engine, `SessionLocal` e a dependência `get_db` (gerador com `yield`)                      |
+| `config.py`   | Classe `Settings` (`pydantic-settings`) que lê e valida as variáveis de conexão do `.env`  |
 
 ## Estrutura de pastas
 
 ```text
 CRUD/
+├── .venv/
+├── assets/
 ├── BACKEND/
-│   ├── main.py
-│   ├── router.py
-│   ├── schema.py
+│   ├── config.py
 │   ├── crud.py
-│   ├── models.py
 │   ├── database.py
+│   ├── dockerfile
+│   ├── main.py
+│   ├── models.py
 │   ├── requirements.txt
-│   └── dockerfile-backend
+│   ├── router.py
+│   └── schema.py
 ├── FRONTEND/
-│   └── dockerfile            # reservado para a próxima etapa
+│   ├── .streamlit/
+│   ├── styles/
+│   ├── .dockerignore
+│   ├── app.py
+│   ├── app_old1.py
+│   └── dockerfile
+├── .env
+├── .env.example
+├── .gitignore
+├── .python-version
 ├── docker-compose.yml
+├── poetry.lock
+├── poetry.toml
 ├── pyproject.toml
-└── poetry.lock
+└── README.md
 ```
 
 ## Endpoints
@@ -146,6 +133,7 @@ Pré-requisitos: [Docker](https://docs.docker.com/get-docker/) e Docker Compose.
 ```bash
 git clone https://github.com/flrmedeiros78/Python.git
 cd Python/CRUD
+cp .env.example .env   # ajuste as variáveis se necessário
 docker compose up --build
 ```
 
@@ -155,9 +143,15 @@ Depois de subir:
 - Documentação ReDoc: <http://localhost:8000/redoc>
 - PostgreSQL: `localhost:5432` (banco `mydatabase`)
 
+O front-end em Streamlit ainda não está incluído no `docker-compose.yml`; para rodá-lo separadamente:
+
+```bash
+poetry run streamlit run FRONTEND/app.py
+```
+
 Para parar e remover os containers: `docker compose down` (adicione `-v` para apagar também o volume do banco).
 
-> As credenciais do banco no `docker-compose.yml` são de desenvolvimento. Em um ambiente real, use variáveis de ambiente e não versione senhas.
+> As credenciais reais do banco ficam no `.env` (fora do versionamento). O `.env.example` mostra as variáveis esperadas sem valores sensíveis.
 
 ## Habilidades praticadas
 
@@ -173,11 +167,14 @@ Para parar e remover os containers: `docker compose down` (adicione `-v` para ap
 - Validação com Pydantic v2: tipos `Decimal`, `EmailStr`, `Annotated` e `Field(gt=0)`
 - Separação entre schema de validação e modelo de banco de dados
 
+**Configuração e front-end**
+- Gerenciamento de variáveis de ambiente com `pydantic-settings` e `python-dotenv`
+- Front-end simples em Streamlit consumindo a API
+
 **DevOps e ferramentas**
 - Containerização com Dockerfile e orquestração com Docker Compose
 - Rede interna entre serviços, volumes persistentes e variáveis de ambiente
-- Leitura de configuração pelo ambiente com `os.getenv` e valor padrão
-- Gerenciamento de dependências com Poetry
+- Gerenciamento de dependências com Poetry (`pyproject.toml`, `poetry.toml`, `poetry.lock`)
 - Git e GitHub, `.gitignore`, mensagens de commit no padrão Conventional Commits
 - Leitura de logs (`docker compose logs`) para diagnosticar falhas
 
@@ -186,53 +183,56 @@ Para parar e remover os containers: `docker compose down` (adicione `-v` para ap
 O projeto rendeu bons aprendizados de depuração:
 
 1. **Problema:** `TypeError` ao usar `bool | None`
- - **Causa:** Imagem Docker com Python 3.9, enquanto o código usa sintaxe do 3.10+
- - **Resolução:** Atualizar a imagem base para `python:3.12-slim`
+   - **Causa:** Imagem Docker com Python 3.9, enquanto o código usa sintaxe do 3.10+
+   - **Resolução:** Atualizar a imagem base para `python:3.12-slim`
 
 2. **Problema:** Build falhando com `pg_config not found`
- - **Causa:** `psycopg2` tentando compilar em imagem `slim`
- - **Resolução:** Trocar por `psycopg2-binary`
+   - **Causa:** `psycopg2` tentando compilar em imagem `slim`
+   - **Resolução:** Trocar por `psycopg2-binary`
 
 3. **Problema:** Erros de tipo no Pydantic com `condecimal`
- - **Causa:** Uso sem parênteses e sem parâmetros
- - **Resolução:** `Annotated[Decimal, Field(gt=0)]`
+   - **Causa:** Uso sem parênteses e sem parâmetros
+   - **Resolução:** `Annotated[Decimal, Field(gt=0)]`
 
 4. **Problema:** `create_all() got an unexpected keyword 'bin'`
- - **Causa:** Erro de digitação no parâmetro
- - **Resolução:** `bind=engine`
+   - **Causa:** Erro de digitação no parâmetro
+   - **Resolução:** `bind=engine`
 
 5. **Problema:** Compose construindo a imagem antiga
- - **Causa:** Arquivo de Dockerfile com nome diferente do configurado
- - **Resolução:** Alinhar `dockerfile:` no `docker-compose.yml`
+   - **Causa:** Arquivo de Dockerfile com nome diferente do configurado
+   - **Resolução:** Alinhar `dockerfile:` no `docker-compose.yml`
 
 6. **Problema:** Arquivos `__pycache__` no commit
- - **Causa:** Falta de `.gitignore` na raiz do projeto
- - **Resolução:** Criar `.gitignore` e remover do stage
+   - **Causa:** Falta de `.gitignore` na raiz do projeto
+   - **Resolução:** Criar `.gitignore` e remover do stage
 
 7. **Problema:** `GET /products/{id}` retornando erro 500
- - **Causa:** A rota chamava `get_products` (lista) passando `product_id`
- - **Resolução:** Usar `get_product`, que busca um item pelo id
+   - **Causa:** A rota chamava `get_products` (lista) passando `product_id`
+   - **Resolução:** Usar `get_product`, que busca um item pelo id
 
 8. **Problema:** `TypeError` ao listar ou buscar produtos
- - **Causa:** Duas funções `get_products` no mesmo arquivo; a segunda sobrescrevia a primeira
- - **Resolução:** Separar em `get_products` (lista) e `get_product` (um item)
+   - **Causa:** Duas funções `get_products` no mesmo arquivo; a segunda sobrescrevia a primeira
+   - **Resolução:** Separar em `get_products` (lista) e `get_product` (um item)
 
 9. **Problema:** `PUT` não atualizava corretamente
- - **Causa:** Condições testavam o objeto do banco e as atribuições sobrescreviam a variável
- - **Resolução:** Testar `product.campo` e gravar em `db_product.campo`
+   - **Causa:** Condições testavam o objeto do banco e as atribuições sobrescreviam a variável
+   - **Resolução:** Testar `product.campo` e gravar em `db_product.campo`
 
 10. **Problema:** `create_engine` recebendo `None`
-  - **Causa:** `os.getenv` chamado sem o nome da variável
-  - **Resolução:** `os.getenv("DATABASE_URL", "valor_padrao")`
+    - **Causa:** `os.getenv` chamado sem o nome da variável
+    - **Resolução:** `os.getenv("DATABASE_URL", "valor_padrao")`
 
-## Próximos passos em andamento:
+11. **Problema:** Backend não subia no Docker após padronizar a configuração
+    - **Causa:** `pydantic-settings` e `python-dotenv` estavam instalados só no Poetry local, faltando em `BACKEND/requirements.txt`; e as variáveis de conexão não estavam declaradas no `environment:` do serviço `backend`
+    - **Resolução:** Adicionar as duas dependências ao `requirements.txt` e passar `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` e `DATABASE_URL` no `docker-compose.yml`
 
-- [ ] Mover as credenciais do banco para um arquivo `.env` fora do versionamento
+## Próximos passos em andamento
+
 - [ ] Adicionar healthcheck ao PostgreSQL e `depends_on` com `service_healthy`
 - [ ] Migrações de banco com Alembic
 - [ ] Usar `Numeric` no banco para o campo `valor`
 - [ ] Testes automatizados com pytest e `TestClient`
-- [ ] Construir o front-end (pasta `FRONTEND`)
+- [ ] Incluir o serviço do front-end (Streamlit) no `docker-compose.yml`
 - [ ] Paginação e filtros na listagem de produtos
 
 ## Créditos
