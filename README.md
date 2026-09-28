@@ -43,8 +43,6 @@ O backend é dividido em camadas, cada uma com uma responsabilidade:
 
 ![Diagrama de arquitetura](img/diagrama-arquitetura-crud-produtos.svg)
 
-![alt text](img/diagrama-arquitetura-crud-produtos.svg)
-
 | Arquivo | Responsabilidade |
 |---------------|-------------------------------------------------------------------------------------------|
 | `main.py`     | Cria a aplicação FastAPI, registra o router e cria as tabelas                             |
