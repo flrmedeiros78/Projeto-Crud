@@ -40,6 +40,18 @@ services:
       #- postgres
     networks:
       - mynetwork
+  frontend:
+    build:
+      context: ./FRONTEND
+      dockerfile: dockerfile
+    environment:
+      API_URL: http://backend:8000
+    ports:
+    - "8501:8501"
+    depends_on:
+    - backend
+    networks:
+    - mynetwork
 
 networks:
   mynetwork:

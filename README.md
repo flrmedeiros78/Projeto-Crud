@@ -41,7 +41,7 @@ API REST para cadastro e gerenciamento de produtos, construída durante o treina
 
 O backend é dividido em camadas, cada uma com uma responsabilidade:
 
-![Diagrama de arquitetura](assets/diagrama-arquitetura.svg)
+![Diagrama de arquitetura](img/diagrama-arquitetura-crud-produtos.svg)
 
 ![alt text](img/diagrama-arquitetura-crud-produtos.svg)
 

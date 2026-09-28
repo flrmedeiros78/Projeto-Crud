@@ -1,134 +1,16 @@
 import streamlit as st
-import requests
-import pandas as pd
 from datetime import datetime
 from pathlib import Path
-import math
-#--------------------------------------------------- 
-# URL base da API FastAPI (backend)
-#--------------------------------------------------- 
-API = "http://localhost:8000"
+
+from utils.api import api
+from utils.fmt_valor import fmt_valor
+from utils.parse_valor import parse_valor
+from utils.dict_para_dataframe import dict_para_dataframe
 
 st.set_page_config(page_title="CRUD Produtos", layout="wide")
 st.title("Projeto CRUD de Produtos")
 
-#--------------------------------------------------- 
-#Caminho dp arquivo de logo
-#--------------------------------------------------- 
-#LOGO_PATH = Path(__file__).parent / "assets" / "logo.png"
-
-#--------------------------------------------------- 
-# Configuração da página
-#--------------------------------------------------- 
-# st.set_page_config(
-#   page_title="Crud de Produtos", 
-#   layout="wide")
-
-#--------------------------------------------------- 
-# Carrega e exibe o logo no topo(largura de 120px)
-#--------------------------------------------------- 
-# if LOGO_PATH.exists():
-#   st.image(str(LOGO_PATH),width=120)
-# else:
-#   st.warning("Logo não encontrado em assets/logo.img")  
-
-# Titulo principal da aplicação
-# st.title("Crud de Produtos")
-#Linha divisória entre o cabeçalho e o conteúdo
 st.divider()
-
-#--------------------------------------------------- 
-# Função para pesquisar a API
-#--------------------------------------------------- 
-def api(method, path, data=None):
-  """ 
-    Envia uma requisição HTTP para a API FastAPI.
-  
-  Parâmetros:
-    method: 'GET-(Select)', 'POST-(inserir)', 'PUT-(Atualiza)', 'DELETE-(Exclui)'
-    path: caminho do endpoint (ex:'/products/')
-  
-  Retorna: JSON da resposta, ou dict com chave'error' em caso de falha.
-  """
-  try:
-    # requests.request(0) aceita qualquer HTTP
-    r = requests.request(method, f"{API}{path}", json=data, timeout=10)
-    # Se o status for 4xx/5xx,  HTTPError
-    r.raise_for_status()
-    # Converte a resposta em bytes para dict/list Python
-    return r.json()
-
-  # Backend não está no ar
-  except requests.exceptions.ConnectionError:
-    st.error("API Indisponível, Verfique se o backend esá rodando")
-    st.stop() # para a execução do script
-
-  # Error HTTP(404,422 etc..)
-  except requests.exceptions.HTTPError as e:
-    if e.response.status_code == 404:
-      return {"error": "Produto não encontrado."}
-    if e.response.status_code == 422: # 422 = erro de validação do Pydantic
-      return {"error": f"Validação: {e.response.json()}"}
-    return {"error": str(e)}
-
-#--------------------------------------------------- 
-# FUNÇÃO AUXILIAR: FORMATAR VALOR MONETÁRIO
-#--------------------------------------------------- 
-def fmt_valor(v):
-    """Converte um número para formato brasileiro: 1500.50 -> 'R$ 1.500,50'"""
-    num = float(v)
-    # Proteção: se o valor é irrealmente grande, não tenta formatar
-    if num > 1_000_000_000:  # acima de 1 bilhão, algo está errado
-        return "Valor corrompido"
-    s = f"{num:,.2f}"
-    s = s.replace(",", "x").replace(".", ",").replace("x", ".")
-    return f"R$ {s}"
- 
-def parse_valor(v: str) -> float:
-    """'1.500,00' → 1500.00"""
-    result = float(v.replace(".", "").replace(",", "."))
-    if not math.isfinite(result):
-        raise ValueError(f"Valor inválido: '{v}'")
-    # Proteção: impede salvar valores absurdos
-    if result > 1_000_000_000:
-        raise ValueError(f"Valor muito alto: {result:,.2f}")
-    return result 
- 
- 
-#--------------------------------------------------- 
-#Função : Converte lista de dict para dataframe
-#---------------------------------------------------  
-def dict_para_dataframe(prods):
-  """
-  Recebe a lista de Produtos (list de discts) retornada pela API e devolve um Dataframe formatado para visualização
-  
-  Por que usar pandas :
-  - st.dataframe() com DataFrame suporta ordenação clicando na coluna
-  - Permite renomear colunas para usuário final
-  - É mais performático que loop + st.markdown para centenas de registros
-  """
-# Cria o DatafRAME a partir da lista de dicionários
-  df = pd.DataFrame(prods)
-  
-# Renomeia as colunas (nomes tecnicos -> nomes legíveis)
-  df = df.rename(columns={
-    "id": "ID",
-    "name": "Nome",
-    "descricao": "Descrição",
-    "valor": "Valor",
-    "categoria": "Categoria",
-    "email_fornecedor": "Fornecedor",
-    "dt_procs": "Data de Inclusão",
-  }).sort_values("ID")
-  # Ordena exibição das colunas no GRID do DataFrame
-  df = df[["ID", "Nome", "Descrição", "Valor", "Categoria", "Fornecedor", "Data de Inclusão"]]
-# Aplica a formatação de moeda na coluna Valor
-  df["Valor"] = df["Valor"].apply(fmt_valor)
-# Formata a data para dd/mm/aaaa hh:mm
-  df["Data de Inclusão"] = pd.to_datetime(df["Data de Inclusão"]).dt.strftime("%d/%m/%Y %H:%M")
-# Remove a coluna de Indice interno do DataFrame não vou precisar
-  return df.reset_index(drop=True)
-
 
 #--------------------------------------------------- 
 # Selecina todos os produtos
@@ -144,7 +26,6 @@ with st.expander("Lista todos os Produtos"):#, expander=True):
     # Verifica se a lista de produto existe
     if isinstance(prods, list) and len(prods) > 0:
       st.success(f"({len(prods)}) - Produtos Encontrados")
-      
       # Converte para DataFrame e exibe a tabela
       # use_container_width=True -> tabela ocupa 100% da largura
       # hide_index=True -> esconde a coluna de índice
@@ -330,7 +211,3 @@ with st.expander("Atualiza Produto", expanded=False):
                 st.error(res['error'])
               else:
                 st.success(f"Produto ID {pid} atualização com sucesso")
-                      # st.rerun()
-                
-        
-    
